@@ -126,6 +126,8 @@ flowchart LR
 .\start.bat --docker   # use the Docker stack instead of running natively
 .\start.bat --kiosk    # booth laptop: booth-only page, no editing
 ```
+**Brand-new Mac (M4 Mac mini)?** Follow [Fresh Mac: Step by Step](lab/SETUP_GUIDE.md#fresh-mac-step-by-step-m4-mac-mini--apple-silicon). If a `.venv` folder exists, the launcher uses it automatically.
+
 Before starting, the launcher updates to the **newest tagged release** (see [Automatic Updates](#automatic-updates--releases)). If you're offline or an update fails its self-check, it just starts the version you already have. Pass `--no-update` to skip the update step. The manual steps below do the same things by hand.
 
 ### 1. Launch Docker Stack

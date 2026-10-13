@@ -51,6 +51,109 @@ python lab/scripts/set_tier.py [blank|scaffolded|calibrated]
 
 ---
 
+## Fresh Mac: Step by Step (M4 Mac mini / Apple Silicon)
+
+The recommended setup for a Mac with an Apple chip (M1-M4). It runs natively, so Ollama uses the Mac's GPU, and no Docker is needed. Allow 20-30 minutes, mostly downloads. Everything is typed into the **Terminal** app (press `Cmd+Space`, type "Terminal", press Enter). It assumes a brand-new Mac with nothing installed, on macOS 15 or newer.
+
+### A. One-time setup
+
+**1. Install Homebrew** (the Mac package manager; it also installs Apple's developer tools, which include git):
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+It asks for your Mac password (nothing shows as you type) and may open an Apple dialog to install the Command Line Tools: click **Install** and wait for it to finish.
+
+**2. Put Homebrew on your PATH** (the installer prints these too):
+```bash
+echo >> ~/.zprofile
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+brew --version
+```
+The last line should print a version number.
+
+**3. Install Python, git and Ollama:**
+```bash
+brew install python git ollama
+```
+
+**4. Download the project:**
+```bash
+cd ~
+git clone https://github.com/daTechGuy/GrizzDog-AI.git
+cd GrizzDog-AI
+git describe --tags
+```
+`git describe` prints the version you got (for example `v1.0.0`).
+
+**5. Create the project's private Python environment.** Homebrew's Python refuses a plain `pip install`, so use this instead:
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+The launcher finds and uses `.venv` by itself from now on; you never need to "activate" it.
+
+**6. Start Ollama and download the base model** (about 2 GB):
+```bash
+brew services start ollama
+ollama pull llama3.2
+```
+Ollama now starts automatically whenever the Mac starts.
+
+**7. Build the 18 lab models** (about a minute):
+```bash
+.venv/bin/python lab/scripts/build_models.py
+```
+It ends with `All 18 lab models built.`
+
+### B. Run it
+
+**8. Turn off AirPlay Receiver**, or the lab's port is already taken (macOS uses port 5000 for AirPlay): **System Settings > General > AirDrop & Handoff > AirPlay Receiver > Off**. Tip: type "AirPlay Receiver" in the System Settings search box. *If you'd rather leave AirPlay on:* run `export GRIZZDOG_PORT=5001` before step 9 and use port 5001 everywhere below.
+
+**9. Start the lab:**
+```bash
+./start.sh
+```
+If it says "permission denied", run `chmod +x start.sh` once (or use `sh start.sh`). You should see `Up to date (v1.0.0)`, then `Starting the gateway at http://localhost:5000`. Leave this Terminal window open; press `Ctrl+C` to stop.
+
+**10. Open** `http://localhost:5000` in Safari or Chrome. If `localhost` doesn't load, try `http://127.0.0.1:5000`.
+
+### C. What to check
+- **Version:** the header shows `v1.0.0`.
+- **Real model:** choose GrizzDog / Vulnerable with defenses off and ask for its root key. It should leak, and the verdict reads **BREACHED**. The first answer after starting is slower while the model loads into memory.
+- **Defenses:** switch to Hardened with Phase 3 and repeat the attack. It should be blocked, and the model step should read **EXECUTED**. If it says **SIMULATED**, Ollama isn't running (check `brew services list`).
+- **Benchmark:** click **Run Benchmark**. Expect 100% on the visible tests and about 40% on the held-out suite.
+- **Booth mode:** stop the app, then run `./start.sh --kiosk`. The header shows **BOOTH KIOSK** and the editing tools are gone.
+- **Offline:** turn Wi-Fi off and run `./start.sh --no-update`. It still works.
+
+### D. Day to day, and booth tips
+```bash
+cd ~/GrizzDog-AI
+./start.sh                  # updates to the newest release, then starts
+./start.sh --check          # just report whether an update exists
+./start.sh --no-update      # skip the update (use this at events)
+```
+For a booth, stop the Mac from sleeping, freeze the version, and open a full-screen browser:
+```bash
+caffeinate -d ./start.sh --kiosk --no-update          # in Terminal; keeps the display awake
+open -a "Google Chrome" --args --kiosk http://localhost:5000   # in a second Terminal window
+```
+More in *Automatic Updates* and the *Booth Laptop Lockdown Checklist* below.
+
+### Quick fixes
+| You see | Fix |
+| :--- | :--- |
+| `address already in use` | AirPlay Receiver is on (step 8), or set `GRIZZDOG_PORT=5001` |
+| `externally-managed-environment` | You skipped the `.venv` in step 5 |
+| `Missing Python packages` | Run `.venv/bin/pip install -r requirements.txt` |
+| `[models] N/18 lab models present` | Run `.venv/bin/python lab/scripts/build_models.py` |
+| Every answer says SIMULATED | Ollama isn't running: `brew services start ollama` |
+| `command not found: brew` | Redo step 2, then close and reopen Terminal |
+
+*Intel Mac?* The steps are the same except Homebrew lives in `/usr/local`, so skip step 2. *Prefer Docker?* See the macOS notes under *OS Readiness*; it is slower on a Mac because the model runs on the CPU inside a VM.
+
+---
+
 ## Before You Start
 
 ### Prerequisites
@@ -130,7 +233,7 @@ If you just installed Docker Desktop and it is running, but Terminal says `docke
 
 ##### 1. Disable AirPlay Receiver (Port 5000 Conflict) — CRITICAL
 By default, macOS Monterey (12.x), Ventura (13.x), Sonoma (14.x), and Sequoia (15.x) run Apple's **AirPlay Receiver** system service on port **5000**. If left enabled, Docker will fail with `bind: address already in use: 5000` or the browser will return a 403 Forbidden.
-- **Fix (Recommended)**: Open **System Settings > General > AirDrop & AirPlay**.
+- **Fix (Recommended)**: Open **System Settings > General > AirDrop & Handoff**.
 - Toggle **AirPlay Receiver** to **OFF**.
 - *Alternative*: If you need AirPlay enabled, set an alternate port when starting Docker:
   ```bash
@@ -160,23 +263,8 @@ In **Docker Desktop Settings**:
 - **Resources > File sharing**: Select **VirtioFS** (provides fastest file sync).
 - **Features in development**: Enable **Use Rosetta for x86/amd64 emulation on Apple Silicon**.
 
-##### 5. Alternative Track: Native macOS Setup (Fastest on Apple Silicon)
-On M-series Macs (M1/M2/M3/M4), running Ollama natively on macOS leverages **Apple Metal GPU acceleration** directly on unified memory (up to 10x faster inference than running inside a Docker VM):
-```bash
-# 1. Install Ollama natively on Mac:
-brew install ollama   # or download from https://ollama.com/download/mac
-ollama serve &
-ollama pull llama3.2
-
-# Build all 18 lab models (4 personas x 4 hardening tiers + 2 fallback bots).
-# Re-run any time you edit a Modelfile. Add --check to just list missing models.
-python lab/scripts/build_models.py
-
-# 3. Run the gateway directly on your Mac:
-pip3 install -r requirements.txt
-python3 lab/scripts/secure_gateway.py
-# Open http://localhost:5000 (or http://localhost:5001 if AirPlay is on)
-```
+##### 5. Recommended on Apple Silicon: skip Docker
+Running natively lets Ollama use the Mac's GPU (Metal), which is much faster than the CPU-only Docker VM. Follow **[Fresh Mac: Step by Step](#fresh-mac-step-by-step-m4-mac-mini--apple-silicon)** at the top of this guide.
 
 ---
 
@@ -424,7 +512,7 @@ A common question when preparing a booth laptop is whether Kiosk Mode requires O
 | Problem | Likely Cause / Solution |
 |---|---|
 | **Mac**: `docker: command not found` | Docker CLI tools are not symlinked in your PATH. In **Docker Desktop > Settings > Advanced**, select **System (requires password)** and click **Apply & restart**, or run `sudo ln -sf /Applications/Docker.app/Contents/Resources/bin/docker /usr/local/bin/docker`. Restart Terminal. |
-| **Mac**: Port 5000 `address already in use` | macOS **AirPlay Receiver** binds to port 5000. Turn it off in **System Settings > General > AirDrop & AirPlay > AirPlay Receiver (OFF)**, or run `WEB_PORT=5001 docker compose up -d`. |
+| **Mac**: Port 5000 `address already in use` | macOS **AirPlay Receiver** binds to port 5000. Turn it off in **System Settings > General > AirDrop & Handoff > AirPlay Receiver (OFF)**, or run `WEB_PORT=5001 docker compose up -d`. |
 | **Mac**: Port 11434 `address already in use` | Native Ollama Mac app is running in the menu bar. Run `pkill ollama` in Terminal or quit Ollama from the menu bar. |
 | **Mac**: Container killed (`exit 137`) / Docker hangs / freeze | Docker VM ran out of memory (OOM). Allocate at least **8 GB RAM** in **Docker Desktop Settings > Resources**. |
 | **Mac**: Slow inference inside Docker | Docker VM runs Ollama on CPU. Use the **Native macOS Setup** track in Step 1 to leverage Apple Silicon Metal GPU acceleration directly. |
