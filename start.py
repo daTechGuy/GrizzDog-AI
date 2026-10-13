@@ -50,7 +50,8 @@ def show_version():
     try:
         import json
         v = json.loads((ROOT / ".grizzdog" / "version.json").read_text(encoding="utf-8"))
-        print(f"GrizzDog-AI {v.get('version', 'unknown')}  ({v.get('channel', '?')} channel)")
+        channel = v.get("channel", "?")
+        print(f"GrizzDog-AI {v.get('version', 'unknown')}  ({'updates off' if channel == 'off' else channel + ' channel'})")
     except (OSError, ValueError):
         pass
 
@@ -78,7 +79,8 @@ def start_native():
             print(f"[models] {first} Build them with: python lab/scripts/build_models.py")
     except (OSError, subprocess.TimeoutExpired):
         pass
-    print("Starting the gateway at http://localhost:5000  (Ctrl+C to stop)")
+    port = os.environ.get("GRIZZDOG_PORT") or os.environ.get("EDUGUARD_PORT") or "5000"
+    print(f"Starting the gateway at http://localhost:{port}  (Ctrl+C to stop)")
     try:
         return subprocess.call([sys.executable, str(ROOT / "lab" / "scripts" / "secure_gateway.py")], cwd=ROOT)
     except KeyboardInterrupt:

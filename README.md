@@ -29,6 +29,7 @@
 - **Held-out benchmark**: reworded, encoded and translated attacks students never see, plus egress DLP tests, so memorizing the visible test phrases no longer earns full marks.
 - **One-command model build**: `build_models.py` builds all 18 models; the pipeline shows `FALLBACK ⚠️` / `SIMULATED ⚠️` when the selected model isn't the one answering.
 - **Phase 3 fixed**: OPA starts again in Docker (a preset file in `policies/` caused a merge error), native setups evaluate the real `rules.json` with a Python port of `gateway.rego`, and Phase 3 now also checks model replies.
+- **Auto-updating launcher**: `start.bat` / `start.sh` update to the newest tagged release before starting, keep student edits, roll back a broken release, and never block startup when offline.
 - **Booth QR code**: scannable in Docker and pointed at Butler's current Cyber Security program page.
 - **Locked down by default**: listens on this computer only, `filter_rules.py` is parsed as data (never executed), cross-site and DNS-rebinding requests are refused, and `GRIZZDOG_KIOSK=1` (or `EDUGUARD_KIOSK=1`) turns a booth laptop into a booth-only kiosk.
 
@@ -118,6 +119,15 @@ flowchart LR
 
 ## Quickstart
 
+### Fastest way: the launcher (updates itself, then starts)
+```bash
+.\start.bat            # Windows (cmd or PowerShell)
+./start.sh             # Mac / Linux
+.\start.bat --docker   # use the Docker stack instead of running natively
+.\start.bat --kiosk    # booth laptop: booth-only page, no editing
+```
+Before starting, the launcher updates to the **newest tagged release** (see [Automatic Updates](#automatic-updates--releases)). If you're offline or an update fails its self-check, it just starts the version you already have. Pass `--no-update` to skip the update step. The manual steps below do the same things by hand.
+
 ### 1. Launch Docker Stack
 From the project root:
 
@@ -178,6 +188,9 @@ All optional. Docker Compose sets the OPA and Ollama ones for you.
 | `GRIZZDOG_PORT` *(legacy: `EDUGUARD_PORT`)* | `5000` | Gateway port |
 | `GRIZZDOG_ALLOWED_HOSTS` *(legacy: `EDUGUARD_ALLOWED_HOSTS`)* | `localhost,127.0.0.1` | Hostnames the gateway answers to; `*` = any (needed for LAN classroom servers) |
 | `GRIZZDOG_KIOSK` *(legacy: `EDUGUARD_KIOSK`)* | `0` | `1` = booth kiosk: booth-only page, no rule/prompt/model editing |
+| `GRIZZDOG_UPDATE_CHANNEL` *(legacy: `EDUGUARD_UPDATE_CHANNEL`)* | `release` | Launcher update channel: `release` (newest tagged version), `main` (latest commit), `off` |
+| `GRIZZDOG_NO_UPDATE` *(legacy: `EDUGUARD_NO_UPDATE`)* | *(unset)* | `1` = freeze: the launcher never updates (use the night before and during events) |
+| `GRIZZDOG_REQUIRE_SIGNED_TAGS` *(legacy: `EDUGUARD_REQUIRE_SIGNED_TAGS`)* | *(unset)* | `1` = only accept release tags that `git verify-tag` trusts |
 | `WEB_BIND` (Compose only) | `127.0.0.1` | Host interface Docker publishes port 5000 on; `0.0.0.0` for LAN access |
 
 ---
@@ -391,7 +404,30 @@ python lab/scripts/set_tier.py calibrated   # Full reference defense benchmark
 
 ---
 
+## Automatic Updates & Releases
+
+`start.bat` / `start.sh` (or `python start.py`) run `lab/scripts/update.py` before the app starts:
+
+- **Release channel (default):** follows the newest tag named `vMAJOR.MINOR.PATCH` (e.g. `v1.2.0`) that is on `main`. Unfinished commits on `main` are never picked up, so booth laptops only run versions you've decided are ready. Until the first tag exists, nothing is updated.
+- **Safe by design:** fast-forward only, so it never overwrites or discards work. A copy with its own unpublished commits is left alone.
+- **Student work is kept.** Edits to `filter_rules.py`, `policies/rules.json` and `lab/modelfiles/*` are backed up (`.grizzdog/backups/`), the update is applied, and the edits are restored. If the new release also changed one of those files you're told, and your copy wins. Any *other* uncommitted change to a tracked file skips the update.
+- **Self-check and rollback:** the new code is compile-checked and the app is start-up tested on the unedited files. If that fails the update is undone and that release isn't retried until a newer one appears.
+- **Offline-safe:** no network, no git, or a ZIP download → it says so and starts the current version.
+- **Model files changed?** The lab models are rebuilt automatically (never downloading the base model).
+- **See what's running:** the version appears in the page header and the console, and in `.grizzdog/version.json`.
+
+Check without changing anything: `.\start.bat --check`. Other channels: `--channel main` (latest commit; for developers) or `--channel off`.
+
+**Publishing a release (instructors):** when `main` is ready for students or a booth:
+```bash
+git tag -a v1.1.0 -m "Booth fixes, new held-out tests"
+git push origin v1.1.0
+```
+Every launcher on its release channel picks it up at its next start. To hold laptops at the current version (e.g. the night before an event), set `GRIZZDOG_NO_UPDATE=1`. Test the exact version you'll show first. For extra protection, sign tags (`git tag -s`) and set `GRIZZDOG_REQUIRE_SIGNED_TAGS=1` on the laptops.
+
 ## Updating to the Latest Lab Version
+
+The launcher above does this for you. To update by hand instead:
 
 If you already cloned the repository or need to pull the latest updates (new GrizzDog hardening tiers, in-browser 3-phase defense studio, Butler CC theming):
 
@@ -428,6 +464,8 @@ All run from the repo root with plain Python (no Docker needed unless noted).
 
 | Script | What it does |
 | :--- | :--- |
+| `start.bat` / `start.sh` / `start.py` (repo root) | Launcher: updates to the newest release, then starts the app (`--docker`, `--kiosk`, `--no-update`, `--channel`, `--check`) |
+| `lab/scripts/update.py` | The updater the launcher runs; also usable alone (`--check` to just see if an update exists) |
 | `lab/scripts/secure_gateway.py` | The web gateway, Defense Studio, booth kiosk and arena (`http://localhost:5000`) |
 | `lab/scripts/build_models.py` | Builds all 18 Ollama lab models (`--docker`, `--check`, `--only ta grader`) |
 | `lab/scripts/evaluate_rules.py` | Scores `filter_rules.py` on the visible and held-out benchmark (`--verbose`) |

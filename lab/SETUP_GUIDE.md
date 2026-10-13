@@ -360,11 +360,39 @@ If your Docker Desktop is outdated:
 
 ---
 
+## Automatic Updates (Launcher)
+
+Start the lab with the launcher instead of running the scripts by hand:
+
+| | Windows | Mac / Linux |
+| :--- | :--- | :--- |
+| Native | `.\start.bat` | `./start.sh` |
+| Docker | `.\start.bat --docker` | `./start.sh --docker` |
+| Booth laptop | `.\start.bat --kiosk` | `./start.sh --kiosk` |
+
+*(Type `.\start.bat` with the leading `.\`; PowerShell requires it, and some Windows setups won't find `start.bat` in the current folder without it.)*
+
+It updates to the newest **release tag** first, then starts. Full behavior: README, *Automatic Updates & Releases*.
+
+**Setting up a laptop so it follows releases:** clone the repo normally (`git clone https://github.com/daTechGuy/GrizzDog-AI.git`). It will move forward to each new release at launch. To start exactly on a release instead of the latest commit: `git checkout v1.1.0` after cloning. (Detached on a tag is fine; the launcher moves it to newer tags.)
+
+**Before an event:**
+1. Launch once at home with internet, so updates and any model rebuilds finish before you travel.
+2. Run `.\start.bat --check` to confirm "Up to date (vX.Y.Z)".
+3. Freeze it: set `GRIZZDOG_NO_UPDATE=1` (PowerShell: `$env:GRIZZDOG_NO_UPDATE="1"`), or launch with `--no-update`.
+4. At the venue, launch with `--no-update --kiosk` (no Wi-Fi needed).
+
+**Releasing (instructor):** `git tag -a v1.1.0 -m "what changed"` then `git push origin v1.1.0`. Laptops pick it up at their next launch. To fix a bad release, publish a fixed, newer tag (e.g. `v1.1.1`); laptops move forward to it at their next launch. Deleting a tag on GitHub does not remove it from laptops that already fetched it. A laptop that took a bad release can be put back by hand with `git checkout <older tag>`.
+
+**Student work during updates:** your edits to `filter_rules.py`, `rules.json` and the Modelfiles are preserved automatically (backups in `.grizzdog/backups/`, last 5 kept). To go back to the shipped default for one file: `git checkout -- lab/scripts/filter_rules.py`.
+
+---
+
 ## Booth Laptop Lockdown Checklist
 
 The gateway has no login. For public events, lock it down in layers:
 
-1. **Kiosk mode + local-only (the default binding):**
+1. **Kiosk mode + local-only (the default binding).** Simplest: `.\start.bat --kiosk` (or `--docker --kiosk`); it also updates first unless you add `--no-update`. By hand:
    ```bash
    # Docker
    GRIZZDOG_KIOSK=1 docker compose up -d
@@ -406,6 +434,10 @@ A common question when preparing a booth laptop is whether Kiosk Mode requires O
 | Modified system prompt not showing | Click **Save & Apply** in the UI editor or refresh the page. |
 | OPA policy blocks unexpected queries | Review `policies/rules.json` confidence thresholds and ensure allowed intents cover your query. |
 | Phase 3 node says "Local Policy Evaluator (OPA engine offline)" | Normal on native Windows/Mac setups: the gateway evaluates `rules.json` with a Python port of `gateway.rego`, so your edits still apply. If it also says "classifier offline", Ollama isn't reachable and only the `rules.json` blacklist is checked. To use real OPA natively, run `opa run --server --watch .` inside `policies/` and start the gateway with `OPA_ENABLED=true OPA_URL=http://localhost:8181/v1/data/gateway/decision`. |
+| Launcher says "Update ... skipped: uncommitted changes in ..." | A tracked file other than the student-editable rules/prompts has local edits (`git status` shows which). Commit or discard them (`git checkout -- <file>`), then start again. |
+| "failed its self-check ... staying on vX" | The newest release didn't pass the automatic start-up test on this computer and was rolled back. Nothing is lost. It is retried when a newer release is published; to retry now, delete `.grizzdog/update_state.json`. |
+| "Could not reach GitHub (offline?)" | Normal without internet: the launcher starts the version you already have. |
+| `start.bat` is "not recognized" | Type `.\start.bat` (with `.\`) or double-click it from File Explorer. |
 | `Host '...' not allowed` (403) | The gateway only answers to `localhost` / `127.0.0.1` by default. Browse to `http://localhost:5000`, or for a LAN classroom server set `GRIZZDOG_ALLOWED_HOSTS` (or `EDUGUARD_ALLOWED_HOSTS`) (e.g. `*` or the server's IP). |
 | Other computers can't open the gateway | By design: it listens on this computer only. See the README's *Security & Network Lockdown* section to opt in to LAN access. |
 | `filter_rules.py` save rejected ("only ... lists are allowed") | The file is data, not code: keep only the three `NAME = ["...", ...]` lists (comments are fine). |
