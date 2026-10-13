@@ -103,6 +103,30 @@ else:
 # Booth kiosk: everything that edits files or rebuilds models is disabled,
 # and the page is locked to the booth view.
 KIOSK_MODE = _env_flag("GRIZZDOG_KIOSK", False) or _env_flag("EDUGUARD_KIOSK", False)
+
+
+def _load_app_version():
+    """Version label shown in the page and console. The launcher/updater
+    writes .grizzdog/version.json (Docker has no git, but mounts the repo);
+    a bare `python secure_gateway.py` falls back to git, then "dev"."""
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    try:
+        with open(os.path.join(repo_root, ".grizzdog", "version.json"), "r", encoding="utf-8") as f:
+            return str(json.load(f).get("version") or "dev")[:40]
+    except (OSError, ValueError):
+        pass
+    try:
+        import subprocess
+        res = subprocess.run(["git", "-C", repo_root, "describe", "--tags", "--always"],
+                             capture_output=True, text=True, timeout=3)
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()[:40]
+    except Exception:
+        pass
+    return "dev"
+
+
+APP_VERSION = _load_app_version()
 OPA_FAIL_OPEN = _env_flag("OPA_FAIL_OPEN", False)
 
 ALLOWED_DOMAINS = {
@@ -3179,6 +3203,7 @@ PAGE = """
         <span class="hud-tag hud-tag-gold">
           ⚡ GRIZZDOG • ANDOVER KS
         </span>
+        <span class="hud-tag" id="appVersionTag" title="Lab version (set by the launcher's updater)">{{ app_version }}</span>
       </div>
     </div>
   </div>
@@ -5360,6 +5385,7 @@ def index():
         current_opa_rules="" if KIOSK_MODE else current_opa_rules,
         opa_enabled=OPA_ENABLED,
         kiosk=KIOSK_MODE,
+        app_version=APP_VERSION,
         result=result,
         examples=EXAMPLE_PROMPTS,
         log=recent_log,
@@ -5623,6 +5649,7 @@ def api_arena_attack():
 if __name__ == "__main__":
     print(f"🐾 Butler GrizzDog Gateway starting (Andover Campus) — Ollama host: {OLLAMA_HOST}")
     print("   Open http://localhost:5000 in your browser")
+    print(f"[INFO] GrizzDog-AI {APP_VERSION}")
     if BIND_HOST not in _LOOPBACK:
         print(f"[WARN] Listening on {BIND_HOST}:{BIND_PORT}: other machines on this network can reach the gateway.")
     if KIOSK_MODE:

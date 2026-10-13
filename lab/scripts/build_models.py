@@ -12,6 +12,7 @@ Usage (from the repo root):
     python lab/scripts/build_models.py --docker   # Ollama in the Docker `llm` container
     python lab/scripts/build_models.py --check    # only report which models are missing
     python lab/scripts/build_models.py --only ta grader   # just these personas
+    python lab/scripts/build_models.py --no-pull  # never download the base model
 
 Exit code is 0 only if every requested model exists afterwards.
 """
@@ -90,6 +91,8 @@ def main():
     ap.add_argument("--docker", action="store_true", help="run ollama inside the docker compose `llm` service")
     ap.add_argument("--check", action="store_true", help="only report missing models; change nothing")
     ap.add_argument("--only", nargs="+", choices=PERSONAS + ["bots"], help="limit to these personas")
+    ap.add_argument("--no-pull", action="store_true",
+                    help="never download the base model; fail if it is missing (used by the auto-updater)")
     args = ap.parse_args()
 
     models = lab_models(args.only)
@@ -110,6 +113,8 @@ def main():
 
     for base in base_models(models):
         if base not in have:
+            if args.no_pull:
+                sys.exit(f"ERROR: base model {base} is not installed and --no-pull was given.")
             print(f"==> Pulling base model {base} (one-time download)...")
             if run(ollama_cmd(args.docker, "pull", base)).returncode != 0:
                 sys.exit(f"ERROR: failed to pull {base}")

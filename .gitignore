@@ -11,3 +11,6 @@ venv/
 *.tmp
 lab/scripts/gateway_log.json
 lab/scripts/gateway_log.jsonl
+
+# Local updater state (versions, backups of student edits)
+.grizzdog/
