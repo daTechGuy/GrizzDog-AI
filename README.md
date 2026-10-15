@@ -6,6 +6,7 @@
 [![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-black)](https://ollama.com/)
 [![OPA](https://img.shields.io/badge/Policy-Open%20Policy%20Agent-4B5563)](https://www.openpolicyagent.org/)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](requirements.txt)
+[![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon%20%7C%20Intel-black?logo=apple&logoColor=white)](setup_mac.sh)
 [![CAE-CD](https://img.shields.io/badge/CAE--CD-Curriculum%20Aligned-purple)](https://www.butlercc.edu)
 
 > [!IMPORTANT]
@@ -146,7 +147,7 @@ docker compose up -d
 
 Open the web sandbox:
 ```text
-http://localhost:5000
+http://localhost:5000  (or http://localhost:5001 if port 5000 is occupied by macOS AirPlay)
 ```
 
 ### 2. Build the Lab Models
@@ -194,7 +195,7 @@ All optional. Docker Compose sets the OPA and Ollama ones for you.
 | `REPORT_SECRET` | *(unset)* | Instructor-only key that signs Canvas lab reports; unset = reports marked UNSIGNED |
 | `HELDOUT_TESTS_PATH` | `lab/benchmark/heldout_tests.json` | Private held-out benchmark file for graded work |
 | `GRIZZDOG_HOST` *(legacy: `EDUGUARD_HOST`)* | `127.0.0.1` (Compose: `0.0.0.0` inside the container) | Network interface to listen on; `0.0.0.0` lets other machines connect |
-| `GRIZZDOG_PORT` *(legacy: `EDUGUARD_PORT`)* | `5000` | Gateway port |
+| `GRIZZDOG_PORT` *(legacy: `EDUGUARD_PORT`)* | `5000` | Gateway port (auto-switches to `5001` if port 5000 is occupied, e.g. macOS AirPlay) |
 | `GRIZZDOG_ALLOWED_HOSTS` *(legacy: `EDUGUARD_ALLOWED_HOSTS`)* | `localhost,127.0.0.1` | Hostnames the gateway answers to; `*` = any (needed for LAN classroom servers) |
 | `GRIZZDOG_KIOSK` *(legacy: `EDUGUARD_KIOSK`)* | `0` | `1` = booth kiosk: booth-only page, no rule/prompt/model editing |
 | `GRIZZDOG_UPDATE_CHANNEL` *(legacy: `EDUGUARD_UPDATE_CHANNEL`)* | `release` | Launcher update channel: `release` (newest tagged version), `main` (latest commit), `off` |
@@ -343,7 +344,7 @@ Output with the shipped calibrated preset. It aces the visible tests but catches
 GrizzDog-AI: Classroom Defense Benchmark Evaluation
 ======================================================================
 Target file: lab/scripts/filter_rules.py
-Active Rules: 53 ingress triggers | 26 secrets | 22 egress patterns
+Active Rules: 55 ingress triggers | 26 secrets | 22 egress patterns
 
 Category                                   Layer/Type      Status   Detail
 ----------------------------------------------------------------------
@@ -474,6 +475,7 @@ All run from the repo root with plain Python (no Docker needed unless noted).
 | Script | What it does |
 | :--- | :--- |
 | `start.bat` / `start.sh` / `start.py` (repo root) | Launcher: updates to the newest release, then starts the app (`--docker`, `--kiosk`, `--no-update`, `--channel`, `--check`) |
+| `setup_mac.sh` (repo root) | Automated 1-command installer for macOS (Homebrew, Python, Ollama, model pull, model builds, `.venv`) |
 | `lab/scripts/update.py` | The updater the launcher runs; also usable alone (`--check` to just see if an update exists) |
 | `lab/scripts/secure_gateway.py` | The web gateway, Defense Studio, booth kiosk and arena (`http://localhost:5000`) |
 | `lab/scripts/build_models.py` | Builds all 18 Ollama lab models (`--docker`, `--check`, `--only ta grader`) |
