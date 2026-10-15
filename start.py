@@ -69,8 +69,12 @@ def start_docker(updated):
 def start_native():
     missing = [m for m in ("flask", "ollama", "requests") if importlib.util.find_spec(m) is None]
     if missing:
-        print(f"Missing Python packages: {', '.join(missing)}\nInstall them with:  python -m pip install -r requirements.txt")
-        return 1
+        print(f"Missing Python packages: {', '.join(missing)}")
+        print("[bootstrap] Installing required packages from requirements.txt...")
+        res = subprocess.call([sys.executable, "-m", "pip", "install", "-r", str(ROOT / "requirements.txt")])
+        if res != 0:
+            print("Failed to auto-install dependencies. Please run: python -m pip install -r requirements.txt")
+            return 1
     try:  # friendly hint only; never builds (the base model download is large)
         cp = subprocess.run([sys.executable, str(ROOT / "lab" / "scripts" / "build_models.py"), "--check"],
                             capture_output=True, text=True, timeout=30)
@@ -79,7 +83,18 @@ def start_native():
             print(f"[models] {first} Build them with: python lab/scripts/build_models.py")
     except (OSError, subprocess.TimeoutExpired):
         pass
-    port = os.environ.get("GRIZZDOG_PORT") or os.environ.get("EDUGUARD_PORT") or "5000"
+    port = os.environ.get("GRIZZDOG_PORT") or os.environ.get("EDUGUARD_PORT")
+    if not port:
+        import socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.bind(("127.0.0.1", 5000))
+                port = "5000"
+            except OSError:
+                port = "5001"
+                os.environ["GRIZZDOG_PORT"] = "5001"
+                print("[port] Port 5000 is in use (common on macOS AirPlay Receiver). Using port 5001.")
     print(f"Starting the gateway at http://localhost:{port}  (Ctrl+C to stop)")
     try:
         return subprocess.call([sys.executable, str(ROOT / "lab" / "scripts" / "secure_gateway.py")], cwd=ROOT)

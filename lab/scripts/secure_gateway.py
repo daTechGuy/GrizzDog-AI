@@ -90,8 +90,24 @@ OPA_ENABLED = _env_flag("OPA_ENABLED", False)
 
 # Network lockdown. Default: only this computer can connect. A classroom
 # server that other machines must reach sets GRIZZDOG_HOST=0.0.0.0 (or EDUGUARD_HOST=0.0.0.0).
-BIND_HOST = (os.environ.get("GRIZZDOG_HOST") or os.environ.get("EDUGUARD_HOST", "127.0.0.1")).strip() or "127.0.0.1"
-BIND_PORT = int(os.environ.get("GRIZZDOG_PORT") or os.environ.get("EDUGUARD_PORT", "5000"))
+def _resolve_bind_port():
+    explicit = os.environ.get("GRIZZDOG_PORT") or os.environ.get("EDUGUARD_PORT")
+    if explicit:
+        try:
+            return int(explicit)
+        except ValueError:
+            return 5000
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind((BIND_HOST, 5000))
+            return 5000
+        except OSError:
+            print("[port] Port 5000 is in use (common with macOS AirPlay Receiver). Auto-switching to port 5001.")
+            return 5001
+
+BIND_PORT = _resolve_bind_port()
 _LOOPBACK = {"localhost", "127.0.0.1", "::1"}
 # Host-header allowlist (blocks DNS-rebinding attacks from web pages).
 # Defaults to loopback names when bound to loopback, else any host.
@@ -5648,7 +5664,7 @@ def api_arena_attack():
 
 if __name__ == "__main__":
     print(f"🐾 Butler GrizzDog Gateway starting (Andover Campus) — Ollama host: {OLLAMA_HOST}")
-    print("   Open http://localhost:5000 in your browser")
+    print(f"   Open http://localhost:{BIND_PORT} in your browser")
     print(f"[INFO] GrizzDog-AI {APP_VERSION}")
     if BIND_HOST not in _LOOPBACK:
         print(f"[WARN] Listening on {BIND_HOST}:{BIND_PORT}: other machines on this network can reach the gateway.")
