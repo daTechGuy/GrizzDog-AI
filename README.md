@@ -26,10 +26,10 @@
 - **Real breach detection**: a leaked secret counts as a breach (`BREACHED 🚨`) with a live model, not just in the offline simulator, including spaced-out or reformatted leaks.
 - **Safe rendering**: model replies and anything students type are HTML-escaped, so a crafted reply can't run code in the browser (OWASP LLM02).
 - **Honest Canvas reports**: HMAC-signed with an instructor-only `REPORT_SECRET` (`verify_report.py`), only Parts 2 & 3 auto-scored, unedited presets earn 0, reflections start empty.
-- **Held-out benchmark**: reworded, encoded and translated attacks students never see, plus egress DLP tests, so memorizing the visible test phrases no longer earns full marks.
 - **One-command model build**: `build_models.py` builds all 18 models; the pipeline shows `FALLBACK ⚠️` / `SIMULATED ⚠️` when the selected model isn't the one answering.
 - **Phase 3 fixed**: OPA starts again in Docker (a preset file in `policies/` caused a merge error), native setups evaluate the real `rules.json` with a Python port of `gateway.rego`, and Phase 3 now also checks model replies.
 - **Auto-updating launcher**: `start.bat` / `start.sh` update to the newest tagged release before starting, keep student edits, roll back a broken release, and never block startup when offline.
+- **Turnkey 1-Command Mac Installer**: Brand-new Macs (M1–M4 Apple Silicon & Intel) install natively with Homebrew, Ollama, model downloads, and auto-port fallback in one Terminal command without needing Docker.
 - **Booth QR code**: scannable in Docker and pointed at Butler's current Cyber Security program page.
 - **Locked down by default**: listens on this computer only, `filter_rules.py` is parsed as data (never executed), cross-site and DNS-rebinding requests are refused, and `GRIZZDOG_KIOSK=1` (or `EDUGUARD_KIOSK=1`) turns a booth laptop into a booth-only kiosk.
 
@@ -119,17 +119,23 @@ flowchart LR
 
 ## Quickstart
 
+### 🍎 Fresh Mac (Apple Silicon M1–M4 & Intel): 1-Command Installer
+Open **Terminal** (`Cmd+Space`, type `Terminal`, press `Enter`) and paste:
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/daTechGuy/GrizzDog-AI/main/setup_mac.sh)"
+```
+*Installs Homebrew, Python, Ollama, downloads `llama3.2`, compiles all 18 models, configures `.venv`, and automatically handles macOS AirPlay port conflicts.*
+
+---
+
 ### Fastest way: the launcher (updates itself, then starts)
 ```bash
 .\start.bat            # Windows (cmd or PowerShell)
 ./start.sh             # Mac / Linux
 .\start.bat --docker   # use the Docker stack instead of running natively
 .\start.bat --kiosk    # booth laptop: booth-only page, no editing
-**Brand-new Mac (M4 Mac mini / Apple Silicon & Intel)?** Run the 1-command turnkey installer in Terminal:
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/daTechGuy/GrizzDog-AI/main/setup_mac.sh)"
 ```
-Or follow the [Mac Setup Guide](lab/SETUP_GUIDE.md#fresh-mac-fast--automated-setup-m4-mac-mini--apple-silicon--intel). The launcher automatically bootstraps `.venv` and manages dependencies.
+Or follow the [Setup Guide](lab/SETUP_GUIDE.md#fresh-mac-fast--automated-setup-m4-mac-mini--apple-silicon--intel). The launcher automatically bootstraps `.venv` and manages dependencies.
 
 ### 1. Launch Docker Stack
 From the project root:
