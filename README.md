@@ -7,7 +7,9 @@
 [![OPA](https://img.shields.io/badge/Policy-Open%20Policy%20Agent-4B5563)](https://www.openpolicyagent.org/)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](requirements.txt)
 [![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon%20%7C%20Intel-black?logo=apple&logoColor=white)](setup_mac.sh)
-[![CAE-CD](https://img.shields.io/badge/CAE--CD-Curriculum%20Aligned-purple)](https://www.butlercc.edu)
+[![CAE-CD Aligned](https://img.shields.io/badge/NSA%2FDHS-CAE--CD%20Curriculum%20Aligned-6b21a8?style=for-the-badge&logo=shield)](https://www.butlercc.edu)
+[![NICE Framework](https://img.shields.io/badge/NIST-NICE%20Work%20Roles-d97706?style=for-the-badge)](https://www.nist.gov/itl/applied-cybersecurity/nice)
+[![Companion K-12 Project](https://img.shields.io/badge/Companion%20K--12-GrizzDog--jrCyberQuest-059669?style=for-the-badge)](https://github.com/daTechGuy/GrizzDog-jrCyberQuest)
 
 > [!IMPORTANT]
 > **Academic Notice & Disclaimer**:
@@ -115,6 +117,60 @@ flowchart LR
 ```
 
 **Without Docker** (native Windows/macOS tracks), there is no OPA container: the gateway evaluates `policies/rules.json` with `lab/scripts/policy_eval.py`, a Python port of `gateway.rego` that gives the same decisions. If Ollama isn't reachable at all, an offline simulator answers in each persona's voice, and the pipeline says so.
+
+---
+
+## 🏛️ NSA/DHS CAE-CD & NIST NICE Curriculum Alignment
+
+Butler Community College (Andover Campus) is a designated **National Center of Academic Excellence in Cyber Defense (CAE-CD)**, co-sponsored by the **National Security Agency (NSA)** and the **Department of Homeland Security (DHS)**.
+
+**GrizzDog-AI** directly implements and assesses core competencies within the **NSA/DHS CAE-CD Knowledge Units (KUs)** and the **NIST NICE Cybersecurity Workforce Framework** (NIST SP 800-181 Rev. 1). Each attack vector, defense layer, and benchmark probe corresponds to formal knowledge units, providing collegiate cybersecurity students with accredited, workforce-aligned competencies.
+
+### 🗺️ Collegiate Curriculum & Workforce Alignment
+
+```mermaid
+graph TD
+    A["🏛️ Butler Community College CAE-CD Cyber Defense Lab"] --> P1["🐕 GrizzDog: Autonomous Quadruped Sentry"]
+    A --> P2["🎓 Sage: Course TA & Socratic Tutor"]
+    A --> P3["📝 GraderBot: Canvas LMS Auto-Grader"]
+    A --> P4["🏛️ Morgan: Registrar & FERPA Records"]
+
+    P1 --> KU1["HDS: Host & Device Security / IoT Quadruped<br/>DLP: Data Loss Prevention"]
+    P2 --> KU2["SSA: System & Software Assurance<br/>AC: Access Control & Basic Networking<br/>POL: Cyber Ethics & AI Safety"]
+    P3 --> KU3["SSA: System & Software Assurance (Indirect Injection)<br/>DLP: Data Loss Prevention"]
+    P4 --> KU4["IA: Information Assurance & Privacy Compliance<br/>DLP: Data Loss Prevention"]
+
+    KU1 --> R1["NICE: Security Control Assessor (SP-RSK-002)"]
+    KU2 --> R2["NICE: Vulnerability Assessment Analyst (SP-DEV-001)"]
+    KU3 --> R3["NICE: Cyber Defense Analyst (PR-CDA-001)"]
+    KU4 --> R4["NICE: Cyber Policy & Privacy Compliance Manager (OV-PMA-001)"]
+```
+
+### 📋 CAE-CD Knowledge Unit (KU) & NIST NICE Workforce Matrix
+
+| Lab Attack Mission / Defense Layer | Target Persona | Industry Taxonomy (OWASP / MITRE ATLAS) | CAE-CD Knowledge Unit (KU) | NIST NICE Work Role & Code | Student Competency & Learning Outcome |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Mission 1: Exam Key Extraction & System Prompt Leakage** | Sage (TA Bot) | `OWASP LLM01: Prompt Injection`<br>`OWASP LLM07: System Prompt Leak`<br>`ATLAS AML.T0051.000` / `AML.T0057` | **SSA: System & Software Assurance**<br>**IA: Information Assurance** | **Vulnerability Assessment Analyst**<br>(`SP-DEV-001`) | Identify direct injection vectors; analyze how system instructions can be extracted via context-wiping and prompt manipulation. |
+| **Mission 2: Authority Spoofing & Privilege Escalation** | Sage (TA)<br>GrizzDog (Sentry) | `OWASP LLM01: Prompt Injection`<br>`OWASP LLM06: Excessive Agency`<br>`ATLAS AML.T0054` / `AML.T0043` | **AC: Access Control**<br>**BN: Basic Networking** | **Cyber Defense Analyst**<br>(`PR-CDA-001`) | Assess social engineering vulnerabilities in automated interfaces; enforce strict cryptographic verification for administrative authority claims. |
+| **Mission 3: Indirect Homework Injection** | GraderBot (LMS Grader) | `OWASP LLM01: Indirect Prompt Injection`<br>`OWASP LLM06: Excessive Agency`<br>`ATLAS AML.T0051.001` | **SSA: System & Software Assurance**<br>**IV: Input Validation** | **Vulnerability Assessment Analyst**<br>(`SP-DEV-001`) | Design robust delimiter architectures (`<student_essay>`) to prevent models from executing untrusted student code or essay comment commands. |
+| **Mission 4: FERPA Student Privacy Exfiltration** | Morgan (Registrar Bot) | `OWASP LLM02: Sensitive Info Disclosure`<br>`ATLAS AML.T0057: LLM Data Extraction` | **IA: Information Assurance**<br>**DP: Data Privacy Compliance** | **Cyber Policy & Privacy Compliance Manager**<br>(`OV-PMA-001`) | Implement compliance safeguards preventing LLMs from releasing confidential student records, disciplinary flags, or database topology. |
+| **Mission 5: Academic Integrity & Socratic Tutoring Bypass** | Sage (TA Bot) | `OWASP LLM01: Prompt Injection`<br>`OWASP LLM04: Policy Subversion`<br>`ATLAS AML.T0054: LLM Jailbreak` | **POL: Cyber Ethics & AI Safety Governance** | **Security Control Assessor**<br>(`SP-RSK-002`) | Enforce behavioral boundaries ensuring automated tutors deliver Socratic hints rather than generating turnkey homework solutions. |
+| **Robotics Sentry: Root Key & Patrol Overrides** | GrizzDog (Unitree Go2 Sentry) | `OWASP LLM02: Sensitive Info Disclosure`<br>`OWASP LLM06: Excessive Agency`<br>`ATLAS AML.T0051` / `AML.T0057` | **HDS: Host & Device Security**<br>**IoT: Quadruped Robotics Security** | **Security Control Assessor**<br>(`SP-RSK-002`) | Secure cyber-physical IoT quadruped robotic assets against unauthorized telemetry modification and firmware root key extraction. |
+| **Phase 2 & 3: Ingress Filtering & Egress DLP** | All Personas (Multi-Phase) | `OWASP LLM02: Sensitive Info Disclosure`<br>`ATLAS AML.T0057: Data Extraction` | **DLP: Data Loss Prevention**<br>**AC: Access Control** | **Cyber Defense Analyst**<br>(`PR-CDA-001`) | Engineer defense-in-depth security architectures combining regex token inspection, Open Policy Agent (OPA) Rego rules, and egress DLP redaction. |
+
+---
+
+### 🤝 K-16 Companion Project Ecosystem
+
+Butler Community College operates a unified, two-tier cybersecurity educational ecosystem featuring the **GrizzDog** cyber mascot:
+
+- **[GrizzDog-AI](https://github.com/daTechGuy/GrizzDog-AI) (Port 5000 — This Repository)**:
+  - **Audience**: Undergraduate cybersecurity degree candidates, college red team competitors, and industry practitioners.
+  - **Focus**: Multi-phase defense engineering (Model Hardening + Static Regex Ingress/Egress DLP + Open Policy Agent Rego semantic evaluation), automated Canvas LMS HMAC-signed batch grading, and 27-vector benchmark evaluation.
+- **[GrizzDog-jrCyberQuest](https://github.com/daTechGuy/GrizzDog-jrCyberQuest) (Port 5050 — Sibling K-12 Outreach Lab)**:
+  - **Audience**: K-12 students (Kindergarten through 12th Grade), STEM expo attendees, and high school recruitment preview days.
+  - **Focus**: Gamified 60–120 second interactive quests with dynamic 4-tier mascot evolutions (Pixar pup to hardened sentry), Treat Phishing Detective (aligned with the physical Unitree Go2 robot dog), and zero-latency offline gameplay.
+- **Side-by-Side Coexistence**: Both platforms feature automatic port collision detection and can run concurrently on the same computer or booth kiosk laptop without conflict.
 
 ---
 

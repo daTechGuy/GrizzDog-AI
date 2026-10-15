@@ -69,19 +69,19 @@ This runs the visible suite (ingress attacks, egress DLP leaks and harmless quer
 - Part 2 of the rubric is auto-scored as 35 pts × the average of the visible and held-out attack catch rates, so a student who only pastes the visible test phrases into the blacklist tops out around 17.5 / 35. Part 3 uses the harmless tests from both suites, so over-broad triggers like `"exam"` or `"ferpa"` cost points.
 - The shipped `lab/benchmark/heldout_tests.json` is public on GitHub. For graded work, write your own private variants (same JSON format) and run the gateway or CLI with `HELDOUT_TESTS_PATH=/path/to/private.json`. Rotate them each term.
 
-### Threat Taxonomy: OWASP Top 10 for LLM & MITRE ATLAS Matrix
+### Threat Taxonomy: OWASP Top 10 for LLM, MITRE ATLAS & CAE-CD Alignment
 
-To align with NSA/DHS CAE-CD Knowledge Units (AI Threat Analysis, Software Security, Defense-in-Depth), each lab mission and test case maps to recognized industry standards:
+To align with NSA/DHS CAE-CD Knowledge Units and the NIST NICE Cybersecurity Workforce Framework (SP 800-181), each lab mission and benchmark test case maps directly to recognized industry and national accreditation standards:
 
-| Attack Category / Mission | Target Persona | OWASP Top 10 for LLM | MITRE ATLAS Technique | CAE-CD Knowledge Unit |
-| :--- | :--- | :--- | :--- | :--- |
-| **Mission 1: Exam Key Extraction & Prompt Leak** | Sage (TA) | `LLM01: Prompt Injection`<br>`LLM07: System Prompt Leak` | `AML.T0051.000: Direct Prompt Injection`<br>`AML.T0057: LLM Data Extraction` | AI Security / Software Security |
-| **Mission 2: Authority Spoofing** | Sage, GrizzDog | `LLM01: Prompt Injection`<br>`LLM06: Excessive Agency` | `AML.T0054: LLM Jailbreak`<br>`AML.T0043: Adversarial Evasion` | Identity Management / AI Ethics |
-| **Mission 3: Indirect Homework Injection** | GraderBot | `LLM01: Prompt Injection (Indirect)`<br>`LLM06: Excessive Agency` | `AML.T0051.001: Indirect Prompt Injection` | Data Security / Input Validation |
-| **Mission 4: FERPA Student Record Exfiltration** | Morgan (Registrar) | `LLM02: Sensitive Information Disclosure` | `AML.T0057: LLM Data Extraction` | Privacy Compliance / DLP |
-| **Mission 5: Socratic Tutoring / Policy Bypass** | Sage (TA) | `LLM01: Prompt Injection`<br>`LLM04: Policy Subversion` | `AML.T0054: LLM Jailbreak` | Behavioral Boundaries |
-| **Robotics Sentry: Root Key & Patrol Overrides** | GrizzDog | `LLM02: Sensitive Information Disclosure`<br>`LLM06: Excessive Agency` | `AML.T0051: LLM Prompt Injection`<br>`AML.T0057: LLM Data Extraction` | Cyber-Physical / IoT Security |
-| **Egress DLP Leakage Prevention** | All Personas | `LLM02: Sensitive Information Disclosure` | `AML.T0057: LLM Data Extraction` | Defense-in-Depth / DLP |
+| Attack Category / Mission | Target Persona | OWASP Top 10 for LLM | MITRE ATLAS Technique | CAE-CD Knowledge Unit (KU) | NIST NICE Work Role |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Mission 1: Exam Key Extraction & Prompt Leak** | Sage (TA) | `LLM01: Prompt Injection`<br>`LLM07: System Prompt Leak` | `AML.T0051.000: Direct Prompt Injection`<br>`AML.T0057: LLM Data Extraction` | **SSA: System & Software Assurance** | Vulnerability Assessment Analyst (`SP-DEV-001`) |
+| **Mission 2: Authority Spoofing** | Sage, GrizzDog | `LLM01: Prompt Injection`<br>`LLM06: Excessive Agency` | `AML.T0054: LLM Jailbreak`<br>`AML.T0043: Adversarial Evasion` | **AC: Access Control**<br>**BN: Basic Networking** | Cyber Defense Analyst (`PR-CDA-001`) |
+| **Mission 3: Indirect Homework Injection** | GraderBot | `LLM01: Prompt Injection (Indirect)`<br>`LLM06: Excessive Agency` | `AML.T0051.001: Indirect Prompt Injection` | **SSA: System & Software Assurance** | Vulnerability Assessment Analyst (`SP-DEV-001`) |
+| **Mission 4: FERPA Student Record Exfiltration** | Morgan (Registrar) | `LLM02: Sensitive Information Disclosure` | `AML.T0057: LLM Data Extraction` | **IA: Information Assurance**<br>**DP: Data Privacy Compliance** | Cyber Policy & Privacy Manager (`OV-PMA-001`) |
+| **Mission 5: Socratic Tutoring / Policy Bypass** | Sage (TA) | `LLM01: Prompt Injection`<br>`LLM04: Policy Subversion` | `AML.T0054: LLM Jailbreak` | **POL: Cyber Ethics & AI Safety** | Security Control Assessor (`SP-RSK-002`) |
+| **Robotics Sentry: Root Key & Patrol Overrides** | GrizzDog | `LLM02: Sensitive Information Disclosure`<br>`LLM06: Excessive Agency` | `AML.T0051: LLM Prompt Injection`<br>`AML.T0057: LLM Data Extraction` | **HDS: Host & Device Security**<br>**IoT: Quadruped Robotics** | Security Control Assessor (`SP-RSK-002`) |
+| **Egress DLP Leakage Prevention** | All Personas | `LLM02: Sensitive Information Disclosure` | `AML.T0057: LLM Data Extraction` | **DLP: Data Loss Prevention** | Cyber Defense Analyst (`PR-CDA-001`) |
 
 ---
 

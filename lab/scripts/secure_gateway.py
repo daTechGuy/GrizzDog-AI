@@ -1437,6 +1437,7 @@ def generate_canvas_lab_report(
     md_lines = [
         "# GrizzDog-AI: Cybersecurity Lab Submission Report",
         "## Butler Community College — Cyber Defense Faculty Research Project (Andover Campus)",
+        "### NSA/DHS Center of Academic Excellence in Cyber Defense (CAE-CD) Curriculum Aligned",
         "",
         "> [!IMPORTANT]",
         "> **Academic Notice & Integrity Verification**  ",
@@ -1471,11 +1472,11 @@ def generate_canvas_lab_report(
         "",
         f"## 2. Automated Defense Benchmark Test Evidence ({len(bm['details'])} Test Cases)",
         "",
-        "| Category | Type | OWASP LLM | MITRE ATLAS | Outcome | Gateway Action |",
-        "|---|---|---|---|---|---|",
+        "| Category | Type | OWASP LLM | MITRE ATLAS | CAE-CD Knowledge Unit | Outcome | Gateway Action |",
+        "|---|---|---|---|---|---|---|",
     ]
     for d in bm["details"]:
-        md_lines.append(f"| {d['category']} | `{d['layer']}/{d['type']}` | {d.get('owasp', 'N/A')} | {d.get('mitre', 'N/A')} | **[{d['status']}]** | {d['action']} |")
+        md_lines.append(f"| {d['category']} | `{d['layer']}/{d['type']}` | {d.get('owasp', 'N/A')} | {d.get('mitre', 'N/A')} | {d.get('cae_ku', 'SSA: System & Software Assurance')} | **[{d['status']}]** | {d['action']} |")
 
     if gen.get("available"):
         md_lines.extend([
@@ -3248,6 +3249,7 @@ PAGE = """
           </button>
         </div>
         {% endif %}
+        <span class="hud-tag" style="background: rgba(126, 34, 206, 0.4); border-color: #c084fc; color: #f3e8ff; font-weight: 800;">🏛️ NSA/DHS CAE-CD Aligned</span>
         <span class="hud-tag hud-tag-gold">
           ⚡ GRIZZDOG • ANDOVER KS
         </span>
@@ -3560,7 +3562,7 @@ PAGE = """
         </div>
 
         <div class="hs-card hs-card-taxonomy" style="border-left: 4px solid #f43f5e; background: rgba(244, 63, 94, 0.06); padding: 1rem; border-radius: 6px; margin-top: .75rem;">
-          <div class="hs-card-title" style="color:#fb7185; font-weight:800; font-size:.95rem; margin-bottom:.35rem;">🛡️ Threat Taxonomy: OWASP Top 10 for LLM & MITRE ATLAS</div>
+          <div class="hs-card-title" style="color:#fb7185; font-weight:800; font-size:.95rem; margin-bottom:.35rem;">🛡️ Threat Taxonomy: OWASP Top 10, MITRE ATLAS & NSA/DHS CAE-CD Alignment</div>
           <div class="hs-card-text" style="font-size:.84rem; line-height:1.45; color:#cbd5e1;">
             <strong>OWASP Top 10 for LLM:</strong><br/>
             &bull; <code>LLM01</code> Prompt Injection (Direct injection &amp; Indirect essay directives)<br/>
@@ -3569,10 +3571,16 @@ PAGE = """
             &bull; <code>LLM07</code> System Prompt Leakage (Extracting confidential faculty instructions)<br/>
             <strong style="display:inline-block; margin-top:.35rem;">MITRE ATLAS Framework:</strong><br/>
             &bull; <code>AML.T0051</code> LLM Prompt Injection &bull; <code>AML.T0051.001</code> Indirect Prompt Injection<br/>
-            &bull; <code>AML.T0054</code> LLM Jailbreak &bull; <code>AML.T0057</code> LLM Data Extraction &bull; <code>AML.T0043</code> Adversarial Evasion
+            &bull; <code>AML.T0054</code> LLM Jailbreak &bull; <code>AML.T0057</code> LLM Data Extraction &bull; <code>AML.T0043</code> Adversarial Evasion<br/>
+            <strong style="display:inline-block; margin-top:.35rem;">🏛️ CAE-CD Knowledge Units (KUs) &amp; NIST NICE Framework Roles:</strong><br/>
+            &bull; <strong>SSA</strong> System &amp; Software Assurance (Work Role: <code>SP-DEV-001</code> Vulnerability Assessment Analyst)<br/>
+            &bull; <strong>AC</strong> Access Control &amp; <strong>BN</strong> Basic Networking (Work Role: <code>PR-CDA-001</code> Cyber Defense Analyst)<br/>
+            &bull; <strong>HDS</strong> Host &amp; Device Security / IoT Quadruped (Work Role: <code>SP-RSK-002</code> Security Control Assessor)<br/>
+            &bull; <strong>IA</strong> Information Assurance &amp; <strong>DP</strong> Data Privacy / FERPA (Work Role: <code>OV-PMA-001</code> Cyber Policy &amp; Privacy Manager)<br/>
+            &bull; <strong>DLP</strong> Data Loss Prevention (Work Role: <code>PR-CDA-001</code> Cyber Defense Analyst)
           </div>
           <div class="hs-card-analogy" style="margin-top:.45rem; font-size:.8rem; color:#fbcfe8;">
-            💡 <strong>CAE-CD Knowledge Unit Alignment:</strong> Learning these standard industry IDs gives students resume-ready terminology for security operations centers (SOC) and AI threat modeling.
+            💡 <strong>CAE-CD Knowledge Unit Alignment:</strong> Learning these standard industry IDs gives students resume-ready terminology for security operations centers (SOC), AI threat modeling, and NSA/DHS accreditation standards.
           </div>
         </div>
       </div>
@@ -3790,7 +3798,7 @@ PAGE = """
     </div>
     <div style="margin-top:1.25rem;">
       <table id="benchmarkTable">
-        <thead><tr><th>Mission Category</th><th>Type</th><th>Outcome</th><th>Intercept Action</th></tr></thead>
+        <thead><tr><th>Mission Category</th><th>Type</th><th>CAE-CD KU</th><th>Outcome</th><th>Intercept Action</th></tr></thead>
         <tbody></tbody>
       </table>
       <div id="bmHeldoutWrap" style="display:none; margin-top:1.25rem;">
@@ -4317,6 +4325,7 @@ PAGE = """
         row.innerHTML = `
           <td><strong>${esc(item.category)}</strong></td>
           <td><code>${esc(item.layer)}/${esc(item.type)}</code></td>
+          <td><span style="font-size:0.72rem; background:rgba(126, 34, 206, 0.2); border:1px solid #c084fc; color:#f3e8ff; padding:2px 6px; border-radius:4px; font-weight:700;">${esc(item.cae_ku || 'SSA: System Assurance')}</span></td>
           <td><span class="badge ${badgeClass}">${esc(item.status)}</span></td>
           <td><code>${esc(item.action)}</code></td>
         `;
@@ -4745,6 +4754,7 @@ PAGE = """
             <td><code>${esc(d.layer)}/${esc(d.type)}</code></td>
             <td><span style="font-size:0.75rem; background:#ede9fe; color:#5b21b6; padding:2px 6px; border-radius:4px; font-weight:600;">${esc(d.owasp || 'N/A')}</span></td>
             <td><span style="font-size:0.75rem; background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:600;">${esc(d.mitre || 'N/A')}</span></td>
+            <td><span style="font-size:0.72rem; background:#f3e8ff; color:#6b21a8; border:1px solid #d8b4fe; padding:2px 6px; border-radius:4px; font-weight:700;">${esc(d.cae_ku || 'SSA: System Assurance')}</span></td>
             <td style="color:${pass ? '#059669' : '#dc2626'}; font-weight:800;">[${esc(d.status)}]</td>
             <td><small>${esc(d.action)}</small></td>
           </tr>
@@ -4832,7 +4842,7 @@ PAGE = """
 
         <h3 style="color:#280b33;">2. Automated Defense Benchmark Test Evidence (${details.length} Test Cases)</h3>
         <table>
-          <thead><tr><th>Test Category</th><th>Type</th><th>OWASP LLM</th><th>MITRE ATLAS</th><th>Result</th><th>Gateway Action / Intercept Rule</th></tr></thead>
+          <thead><tr><th>Test Category</th><th>Type</th><th>OWASP LLM</th><th>MITRE ATLAS</th><th>CAE-CD KU</th><th>Result</th><th>Gateway Action / Intercept Rule</th></tr></thead>
           <tbody>${rowsHtml}</tbody>
         </table>
         ${heldoutHtml}
